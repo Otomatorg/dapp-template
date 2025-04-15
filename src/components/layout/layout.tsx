@@ -7,7 +7,7 @@ import Footer from '../footer/footer'
 import Header from '../header/header'
 
 const Layout = () => {
-  const { isValid, token } = useAuthContext()
+  const { isValid } = useAuthContext()
   const { setUser } = useUserContext()
 
   useEffect(() => {
@@ -23,8 +23,6 @@ const Layout = () => {
     }
 
     if (isValid) {
-      console.log(isValid)
-
       handleGetUserDetails()
     }
   }, [isValid])

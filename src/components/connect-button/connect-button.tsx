@@ -23,25 +23,22 @@ import { Button } from '../ui/button'
 
 const BUTTON_CLASSNAMES =
   '!min-w-[auto] !min-h-[auto] !px-[16px] !py-[12px] !h-[40px] !text-[12px] !rounded-[100px] !bg-black-100 !text-white-100'
-const DEFAULT_ACCESS_CODE = '465d4Z'
+const DEFAULT_ACCESS_CODE = import.meta.env.VITE_OTOMATO_REFERRAL_CODE
 
 const ConnectWalletButton = () => {
-  const chain = useActiveWalletChain() ?? defineChain(EnumChain.BASE)
+  const chain = useActiveWalletChain() || defineChain(EnumChain.BASE)
   const connectedWallets = useConnectedWallets()
   const smartWallet = useActiveWallet()
 
   const { setAuth, setLastAddressLoggedIn: setAddressInContext } = useAuthContext()
 
   const [walletConnected, setWalletConnected] = useState<Wallet | undefined>(undefined)
-  const [isLoading, setIsLoading] = useState(false)
+  const [, setIsLoading] = useState(false)
 
   const accessTokens = JSON.parse(localStorage.getItem('accessTokens') || '{}') as Record<
     string,
     string
   >
-  const token = localStorage.getItem('token') || ''
-  const lastAddressLoggedIn = localStorage.getItem('lastAddressLoggedIn') || ''
-
   const definedChains = useMemo(() => {
     const chains = getAllChainIds()
     return chains.map((chain) => defineChain(chain as number))
@@ -54,7 +51,6 @@ const ConnectWalletButton = () => {
   const { data: walletImage } = useWalletImage(walletId)
 
   const onConnectWallet = (wallet: Wallet) => {
-    console.log('onConnectWallet')
     setWalletConnected(wallet)
   }
 
@@ -76,7 +72,7 @@ const ConnectWalletButton = () => {
 
   const handleCheckLoggedIn = async (): Promise<boolean> => {
     try {
-      const smartAddress = smartWallet?.getAccount()?.address ?? ''
+      const smartAddress = smartWallet?.getAccount()?.address || ''
       const token = accessTokens[smartAddress]
 
       if (!token) {
@@ -98,7 +94,7 @@ const ConnectWalletButton = () => {
 
       return false
     } catch (error) {
-      console.error('Failed to check user logged in: ', error)
+      console.log('Failed to check user logged in: ', error)
     }
 
     await handleLogout()
@@ -112,7 +108,6 @@ const ConnectWalletButton = () => {
     payload: LoginPayload
     signature: string
   }) => {
-    console.log('handleLogin')
     setIsLoading(true)
 
     try {
@@ -148,11 +143,10 @@ const ConnectWalletButton = () => {
   }
 
   const handleGetLoginPayload = async (): Promise<LoginPayload> => {
-    console.log('handleGetLoginPayload')
     setIsLoading(true)
     try {
-      const walletAddress = smartWallet?.getAdminAccount?.()?.address ?? ''
-      const smartAddress = smartWallet?.getAccount?.()?.address ?? ''
+      const walletAddress = smartWallet?.getAdminAccount?.()?.address || ''
+      const smartAddress = smartWallet?.getAccount?.()?.address || ''
 
       const loginPayload = await apiServices.generateLoginPayload(
         smartAddress,

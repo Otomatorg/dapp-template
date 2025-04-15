@@ -1,7 +1,7 @@
-import { Button } from '../ui/button'
-import IconFeedback from '@/assets/icons/ic-feedback.svg'
 import IconDocumentation from '@/assets/icons/ic-documentation.svg'
+import IconFeedback from '@/assets/icons/ic-feedback.svg'
 import { Link } from 'react-router-dom'
+import { Button } from '../ui/button'
 
 const Footer = () => {
   const feedbackUrl = 'https://otomato.canny.io/feature-requests'

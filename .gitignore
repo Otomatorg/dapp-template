@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # secrets
-.env
+.env.local
 jsons
 temp
 stats.html
