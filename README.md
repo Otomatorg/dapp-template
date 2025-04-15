@@ -15,7 +15,7 @@ To run this project, you will need to add the following environment variables to
 
 `VITE_THIRDWEB_CLIENT_ID`: you will provide your clientId, refer to [client documentation](https://portal.thirdweb.com/typescript/v5/client)
 
-## Run locally
+# Run locally
 
 Node version requirement v22+
 
@@ -29,19 +29,27 @@ Install dependencies
 npm install
 ```
 
-Start development server
+## Copy .env.template to .env
+
+```bash
+cp .env.template .env
+```
+
+Don't forget to add your Thirdweb clientId to the .env file
+
+## Start the app locally
 
 ```bash
 npm run dev
 ```
 
-Create a production build
+## Create a production build
 
 ```bash
 npm run build
 ```
 
-Preview the production build
+## Preview the production build
 
 ```bash
 npm run preview
