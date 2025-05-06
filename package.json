@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.487.0",
     "otomato-sdk": "^2.0.108",
+    "posthog-js": "^1.239.1",
     "prettier": "^3.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
