@@ -8,9 +8,6 @@ package = "@netlify/plugin-lighthouse"
 [plugins.inputs.settings]
 preset = "desktop"
 
-[[plugins]]
-package = "/plugins/notify-slack"
-
 [[headers]]
 for = "/*"
 [headers.values]
