@@ -1,8 +1,12 @@
-import { EnumChain } from "@/configs/chain";
+import { EnumChain } from '@/configs/chain'
 
-export const MAX_UNIT256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935n
+export const MAX_UNIT256 =
+  115792089237316195423570985008687907853269984665640564039457584007913129639935n
 
-export const ASSETS = new Map<number, Record<string, { sessionKeys: string[]; approvals: string[] }>>([
+export const ASSETS = new Map<
+  number,
+  Record<string, { sessionKeys: string[]; approvals: string[] }>
+>([
   [
     EnumChain.BASE,
     {

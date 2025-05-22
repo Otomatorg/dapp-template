@@ -72,7 +72,7 @@ const Header = () => {
   // }
 
   return (
-    <header className="w-full flex-shrink-0 flex items-center justify-between gap-2 pt-[16px] px-[20px] pb-[20px]">
+    <header className="w-full flex-shrink-0 flex items-center justify-between gap-2 pt-[16px] px-[20px] pb-[20px] relative z-10">
       <div className="flex-shrink-0 w-[40px] h-[40px]">
         <Link to="/">
           <img src={ImgOtomatoLogo} alt="otomato-logo" />

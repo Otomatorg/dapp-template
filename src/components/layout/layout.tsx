@@ -28,7 +28,7 @@ const Layout = () => {
   }, [isValid])
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-black-400">
       <Header />
 
       <main className="flex-grow overflow-y-auto">
