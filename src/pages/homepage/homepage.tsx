@@ -100,7 +100,7 @@ const Homepage = () => {
               backgroundRepeat: 'repeat',
               backgroundPosition: 'center center',
               animation: 'backgroundScroll 34s linear infinite',
-              transform: 'rotate(-20deg) scale(1)',
+              transform: 'rotate(-20deg) scale(0.86)',
               transition: 'all 0.4s ease-in-out',
             }}
           />
