@@ -1,6 +1,6 @@
 import { createWallet, inAppWallet, walletConnect } from 'thirdweb/wallets'
 
-export enum EnumWallet {
+export enum EWallet {
   METAMASK = 'io.metamask',
   COINBASE = 'com.coinbase.wallet',
   RABBY = 'io.rabby',
@@ -12,7 +12,7 @@ export const wallets = [
       options: ['google'],
     },
   }),
-  createWallet(EnumWallet.METAMASK),
-  createWallet(EnumWallet.RABBY),
+  createWallet(EWallet.METAMASK),
+  createWallet(EWallet.RABBY),
   walletConnect(),
 ]
