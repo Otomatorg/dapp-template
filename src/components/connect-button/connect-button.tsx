@@ -3,11 +3,12 @@ import IconConnectWallet from '@/assets/icons/ic-connect-wallet.svg'
 import { EnumChain, getAllChainIds } from '@/configs/chain'
 import { client } from '@/configs/client'
 import { wallets } from '@/configs/wallet'
+import { TIMEOUT_RELOAD_PAGE } from '@/constants/timing'
 import { decodeJWTAndCheckValidity, useAuthContext } from '@/context/auth-context'
 import { setAxiosAuthorization } from '@/services/axios.config'
 import clsx from 'clsx'
 import { apiServices } from 'otomato-sdk'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { defineChain } from 'thirdweb'
 import { LoginPayload } from 'thirdweb/dist/types/auth/core/types'
 import {
@@ -18,7 +19,6 @@ import {
   useWalletImage,
 } from 'thirdweb/react'
 import { shortenAddress } from 'thirdweb/utils'
-import { Wallet } from 'thirdweb/wallets'
 import { Button } from '../ui/button'
 
 const BUTTON_CLASSNAMES =
@@ -29,98 +29,76 @@ const ConnectWalletButton = () => {
   const chain = useActiveWalletChain() || defineChain(EnumChain.BASE)
   const connectedWallets = useConnectedWallets()
   const smartWallet = useActiveWallet()
-
-  const { setAuth, setLastAddressLoggedIn: setAddressInContext } = useAuthContext()
-
-  const [walletConnected, setWalletConnected] = useState<Wallet | undefined>(undefined)
-  const [, setIsLoading] = useState(false)
+  const { isValid, setAuth, setLastAddressLoggedIn: setAddressInContext } = useAuthContext()
 
   const accessTokens = JSON.parse(localStorage.getItem('accessTokens') || '{}') as Record<
     string,
     string
   >
+
+  const smartAddress = smartWallet?.getAccount()?.address || ''
+  const walletAddress = smartWallet?.getAdminAccount?.()?.address || ''
+
   const definedChains = useMemo(() => {
     const chains = getAllChainIds()
     return chains.map((chain) => defineChain(chain as number))
   }, [])
 
   const walletId = useMemo(() => {
-    return connectedWallets.find((w) => w.id !== walletConnected?.id)?.id
-  }, [connectedWallets, walletConnected?.id])
+    return connectedWallets.find((w) => w.id !== smartWallet?.id)?.id
+  }, [connectedWallets, smartWallet?.id])
 
   const { data: walletImage } = useWalletImage(walletId)
-
-  const onConnectWallet = (wallet: Wallet) => {
-    setWalletConnected(wallet)
-  }
 
   const handleLogout = async () => {
     if (smartWallet) {
       await smartWallet.disconnect()
     }
 
-    setWalletConnected(undefined)
     setAuth('', false)
     setAxiosAuthorization('')
-
     localStorage.removeItem('token')
 
     setTimeout(() => {
       window.location.reload()
-    }, 1000)
+    }, TIMEOUT_RELOAD_PAGE)
   }
 
-  const handleCheckLoggedIn = async (): Promise<boolean> => {
+  const handleCheckLoggedIn = useCallback(async (): Promise<boolean> => {
     try {
-      const smartAddress = smartWallet?.getAccount()?.address || ''
       const token = accessTokens[smartAddress]
 
       if (!token) {
         return false
       }
 
-      // we decode its JWT to check if it's still valid
-      const isValid = decodeJWTAndCheckValidity(token)
+      const isTokenValid = decodeJWTAndCheckValidity(token)
 
-      if (isValid) {
+      if (isTokenValid) {
         localStorage.setItem('token', token)
-
-        setAuth(token, isValid)
+        setAuth(token, isTokenValid)
         setAxiosAuthorization(token)
         setAddressInContext(smartAddress)
-
         return true
       }
 
       return false
     } catch (error) {
-      console.log('Failed to check user logged in: ', error)
+      console.log('Failed to check user logged in:', error)
+      await handleLogout()
+      return false
     }
+  }, [accessTokens, smartAddress, setAuth, setAxiosAuthorization, setAddressInContext])
 
-    await handleLogout()
-    return false
-  }
-
-  const handleLogin = async ({
-    payload,
-    signature,
-  }: {
-    payload: LoginPayload
-    signature: string
-  }) => {
-    setIsLoading(true)
-
+  const handleLogin = async (payload: LoginPayload, signature: string): Promise<void> => {
     try {
       const { token } = await apiServices.getToken(payload, signature)
-
       if (!token) {
-        throw new Error('Failed to get token')
+        throw new Error('Failed to get authentication token')
       }
 
-      const smartAddress = smartWallet?.getAccount()?.address || ''
       const updatedTokens = { ...accessTokens, [smartAddress]: token }
 
-      // Set authentication and persist data
       setAuth(token, true)
       setAxiosAuthorization(token)
 
@@ -130,24 +108,22 @@ const ConnectWalletButton = () => {
 
       setTimeout(() => {
         window.location.reload()
-      }, 1000)
-    } catch (error: any) {
-      console.error('Failed to get token: ', error)
-
+      }, TIMEOUT_RELOAD_PAGE)
+    } catch (error) {
+      console.log('Login failed:', error)
       if (smartWallet) {
         await smartWallet.disconnect()
       }
-    } finally {
-      setIsLoading(false)
+      throw error
     }
   }
 
   const handleGetLoginPayload = async (): Promise<LoginPayload> => {
-    setIsLoading(true)
-    try {
-      const walletAddress = smartWallet?.getAdminAccount?.()?.address || ''
-      const smartAddress = smartWallet?.getAccount?.()?.address || ''
+    if (isValid) {
+      throw new Error('Already authenticated')
+    }
 
+    try {
       const loginPayload = await apiServices.generateLoginPayload(
         smartAddress,
         chain.id,
@@ -157,39 +133,33 @@ const ConnectWalletButton = () => {
 
       if (!loginPayload?.address) {
         await handleLogout()
-
-        throw new Error('Failed to generate login payload')
+        throw new Error('Failed to generate login payload: Invalid address')
       }
 
       return loginPayload
     } catch (error: any) {
       await handleLogout()
-
-      const errorMessage = error?.message || error?.response?.data?.message
+      const errorMessage =
+        error?.message || error?.response?.data?.message || 'Failed to generate login payload'
       throw new Error(errorMessage)
-    } finally {
-      setIsLoading(false)
     }
   }
 
   const renderConnectedButton = useCallback(() => {
-    const adminAccount = smartWallet?.getAdminAccount?.()
-    const address = adminAccount?.address
+    if (!walletAddress) return <div />
 
-    return address ? (
+    return (
       <Button className={clsx(BUTTON_CLASSNAMES, 'flex items-center !px-[8px]')}>
         <div className="w-[24px] h-[24px] rounded-full overflow-hidden bg-black-300">
           <img src={walletImage} alt="img-wallet" />
         </div>
-        <label>{shortenAddress(address)}</label>
+        <label>{shortenAddress(walletAddress)}</label>
         <div>
           <img src={IconChevronDown} alt="ic-chevron-down" />
         </div>
       </Button>
-    ) : (
-      <div />
     )
-  }, [smartWallet, walletImage])
+  }, [walletAddress, walletImage])
 
   return (
     <div>
@@ -226,13 +196,16 @@ const ConnectWalletButton = () => {
           size: 'wide',
           titleIcon: '',
         }}
-        onConnect={onConnectWallet}
+        onConnect={() => {}}
         onDisconnect={handleLogout}
         showAllWallets={false}
         auth={{
-          isLoggedIn: handleCheckLoggedIn,
-          doLogin: handleLogin,
+          isLoggedIn: async () => {
+            if (!smartAddress) return false
+            return await handleCheckLoggedIn()
+          },
           getLoginPayload: handleGetLoginPayload,
+          doLogin: async ({ payload, signature }) => handleLogin(payload, signature),
           doLogout: handleLogout,
         }}
       />

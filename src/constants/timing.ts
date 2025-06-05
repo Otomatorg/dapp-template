@@ -1,0 +1,1 @@
+export const TIMEOUT_RELOAD_PAGE = 1000
