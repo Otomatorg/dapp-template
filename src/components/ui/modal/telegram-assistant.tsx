@@ -1,12 +1,12 @@
 import IcTelegramLogo from '@/assets/icons/ic-telegram-logo.svg'
 import ImgTelegramAssistant from '@/assets/images/img-otomato-telegram-assistant.png'
 import { useAuthContext } from '@/context/auth-context'
+import { useWallets } from '@privy-io/react-auth'
+import { useEffect, useRef, useState } from 'react'
 import Button from '../button/button'
-import Modal from './modal'
-import { useUserContext } from '@/context/user-context'
-import { useEffect, useState, useRef } from 'react'
-import { Label } from '../label'
 import { Input } from '../input'
+import { Label } from '../label'
+import Modal from './modal'
 
 const telegramAssistantUrl = 'https://t.me/OtomatoStagingBot?start=agent_noti-hyperevm_w_[address]'
 interface ITelegramAssistantProps {
@@ -15,7 +15,7 @@ interface ITelegramAssistantProps {
 
 const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
   const { isAuthenticated } = useAuthContext()
-  const { walletAddress } = useUserContext()
+  const { wallets } = useWallets()
 
   const [inputWalletAddress, setInputWalletAddress] = useState('')
   const [validationState, setValidationState] = useState<'idle' | 'loading' | 'success' | 'error'>(
@@ -61,9 +61,9 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setInputWalletAddress(walletAddress)
+      setInputWalletAddress(wallets?.[0]?.address || '')
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, wallets])
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -164,7 +164,7 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
 
         <Button
           variant="blue"
-          disabled={!inputWalletAddress}
+          disabled={!validateWalletAddress(inputWalletAddress)}
           className="w-max h-12 rounded-full px-5 py-4 mx-auto font-manrope"
           rightIcon={<img src={IcTelegramLogo} alt="ic-telegram-bot" />}
           onClick={handleLaunchAssistant}
