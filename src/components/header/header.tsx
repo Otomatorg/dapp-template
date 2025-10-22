@@ -1,86 +1,58 @@
-import ImgOtomatoLogo from '@/assets/images/img-otomato-logo.png'
-import { Link } from 'react-router-dom'
-import ConnectButton from '../connect-button/connect-button'
+import IcChevronDown from '@/assets/icons/ic-gray-chevron-down.svg'
+import ImgHeaderLogo from '@/assets/images/img-hyperswap-logo@2x.png'
+import { PATHNAME } from '@/constants/pathname'
+import { cn } from '@/lib/utils'
+import { Link, useLocation } from 'react-router-dom'
+import WalletConnection from './components/wallet-connection'
 
 const Header = () => {
-  // const smartAccount = useActiveAccount()
-  // const { mutate: sendBatch } = useSendBatchTransaction()
-
-  // const handleGetContract = (address: string, chainId: number) => {
-  //   console.log(address)
-
-  //   return getContract({
-  //     address,
-  //     chain: defineChain(chainId),
-  //     client,
-  //   })
-  // }
-
-  // const handleCreateApprovals = () => {
-  //   const approvals = getAllApprovals(EnumChain.BASE)
-  //   const approvalTransactions = []
-
-  //   for (const [asset, addresses] of Object.entries(approvals)) {
-  //     const address = ADDRESS_SYMBOLS[asset as keyof typeof ADDRESS_SYMBOLS]
-  //     const contract = handleGetContract(address, EnumChain.BASE)
-
-  //     approvalTransactions.push(
-  //       ...addresses.map((address) =>
-  //         approve({
-  //           contract,
-  //           spender: address,
-  //           amountWei: MAX_UNIT256,
-  //         }),
-  //       ),
-  //     )
-  //   }
-
-  //   return approvalTransactions
-  // }
-
-  // const handleApproveSessionKeys = async () => {
-  //   const smartAddress = smartAccount?.address || ''
-  //   const accountContract = handleGetContract(smartAddress, EnumChain.BASE)
-
-  //   // Generate the session keys
-  //   const sessionKeys = getAllSessionKeys(EnumChain.BASE)
-  //   const sessionKey = addSessionKey({
-  //     contract: accountContract,
-  //     account: smartAccount as Account,
-  //     sessionKeyAddress: import.meta.env.VITE_THIRDWEB_SESSION_KEY,
-  //     permissions: {
-  //       approvedTargets: sessionKeys,
-  //     },
-  //   })
-
-  //   // Generate the approvals
-
-  //   const approvals = handleCreateApprovals() || []
-  //   const transactions = [sessionKey, ...approvals]
-
-  //   console.log(sessionKeys, approvals)
-
-  //   // Execute batch transaction
-  //   sendBatch(transactions, {
-  //     onError: (error: any) => {
-  //       alert('Failed to approve session keys:' + ' ' + error.message)
-  //     },
-  //     onSuccess: () => {
-  //       alert('Successfully approved session keys')
-  //     },
-  //   })
-  // }
+  const { pathname } = useLocation()
 
   return (
-    <header className="w-full flex-shrink-0 flex items-center justify-between gap-2 pt-[16px] px-[20px] pb-[20px] relative z-10">
-      <div className="flex-shrink-0 w-[40px] h-[40px]">
-        <Link to="/">
-          <img src={ImgOtomatoLogo} alt="otomato-logo" />
+    <header className="container h-20 shrink-0 grid grid-cols-3 items-center bg-rgba10-150 sticky top-0 left-0 z-10 px-9 py-4 backdrop-blur-[2.34375rem]">
+      <div className="flex justify-start">
+        <Link to={PATHNAME.HOME}>
+          <img srcSet={`${ImgHeaderLogo} 1x, ${ImgHeaderLogo} 2x`} alt="hyperswap-logo" />
         </Link>
       </div>
 
-      <div className="flex-shrink-0 flex items-center gap-2">
-        <ConnectButton />
+      <div className="flex justify-center">
+        <ul className="flex items-center gap-2 rounded-[1.125rem] border border-rgba255-100">
+          <li className="flex-1 px-4 py-3 text-rgba255-400 cursor-pointer hover:text-white-100 transition-colors duration-300">
+            <span className="text-sm font-medium">Trade</span>
+          </li>
+          <li className="flex-1 px-4 py-3 text-rgba255-400 cursor-pointer hover:text-white-100 transition-colors duration-300">
+            <span className="text-sm font-medium">Explore</span>
+          </li>
+          <li
+            className={cn(
+              'flex-1 px-4 py-3 text-rgba255-400 cursor-pointer hover:text-white-100 transition-colors duration-300 relative',
+              {
+                'text-white-100': pathname === PATHNAME.HOME,
+                'before:content-["_"] before:absolute before:left-[50%] before:translate-x-[-50%] before:-bottom-0.5 before:w-10 before:h-[3px] before:bg-[linear-gradient(90deg,rgba(250,250,250,0.00)_0%,rgba(250,250,250,0.60)_50%,rgba(250,250,250,0.00)_100%)] backdrop-blur-[0.015625rem]':
+                  pathname === PATHNAME.HOME,
+              },
+            )}
+          >
+            <span className="text-sm font-medium">Positions</span>
+          </li>
+          <li className="flex-1 px-4 py-3 text-rgba255-400 cursor-pointer hover:text-white-100 transition-colors duration-300 flex items-center gap-0.5">
+            <span className="text-sm font-medium">Earn</span>
+            <span className="shrink-0 w-4 h-4">
+              <img src={IcChevronDown} alt="chevron-down" />
+            </span>
+          </li>
+          <li className="flex-1 px-4 py-3 text-rgba255-400 cursor-pointer hover:text-white-100 transition-colors duration-300">
+            <span className="text-sm font-medium">Points</span>
+          </li>
+          <li className="flex-1 px-4 py-3 text-rgba255-400 cursor-pointer hover:text-white-100 transition-colors duration-300">
+            <span className="text-sm font-medium">Bridge</span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="flex justify-end">
+        <WalletConnection />
       </div>
     </header>
   )

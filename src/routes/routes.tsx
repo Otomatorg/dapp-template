@@ -1,5 +1,5 @@
 import Layout from '@/components/layout/layout'
-import HomePage from '@/pages/homepage/homepage'
+import HomePage from '@/features/homepage/homepage'
 import { createBrowserRouter, RouteObject } from 'react-router-dom'
 
 const routes: RouteObject[] = [

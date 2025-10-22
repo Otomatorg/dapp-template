@@ -1,6 +1,5 @@
-import { LoginPayload } from 'thirdweb/auth'
-
-export type TypeLoginPayload = {
-  payload: LoginPayload
-  signature: string
+export interface IGetTokenModel {
+  walletAddress: string // Get from zerodev when creating kernelAccount
+  ownerWalletAddress: string // Get from wallet of usePrivy()
+  accessToken: string // Get from getAccessToken() of usePrivy()
 }

@@ -2,19 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  line-height: 1.5;
-  font-weight: 400;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-family: 'Manrope', sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'slnt' 0;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -64,8 +51,95 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    overflow: hidden;
+  }
+}
+
+:root {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'slnt' 0;
+  font-synthesis: none;
+
+  --container-sm: 40rem; /* 640px */
+  --container-md: 48rem; /* 768px */
+  --container-lg: 64rem; /* 1024px */
+  --container-xl: 80rem; /* 1280px */
+  --container-2xl: 90rem; /* 1440px */
+
+  --spacing-0: 0;
+  --spacing-px: 0.0625rem; /* 1px */
+  --spacing-0-5: 0.125rem; /* 2px */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-1-5: 0.375rem; /* 6px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-2-5: 0.625rem; /* 10px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-3-5: 0.875rem; /* 14px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-5: 1.25rem; /* 20px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-7: 1.75rem; /* 28px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-9: 2.25rem; /* 36px */
+  --spacing-10: 2.5rem; /* 40px */
+  --spacing-12: 3rem; /* 48px */
+  --spacing-16: 4rem; /* 64px */
+  --spacing-20: 5rem; /* 80px */
+  --spacing-24: 6rem; /* 96px */
+}
+
+@layer components {
+  .container {
+    width: var(--container-2xl);
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-9);
+    padding-right: var(--spacing-9);
+  }
+
+  .container-xl {
+    width: var(--container-xl);
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-9);
+    padding-right: var(--spacing-9);
+  }
+
+  .container-lg {
+    width: var(--container-lg);
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-9);
+    padding-right: var(--spacing-9);
+  }
+
+  .container-md {
+    width: var(--container-md);
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-9);
+    padding-right: var(--spacing-9);
+  }
+
+  .container-sm {
+    width: var(--container-sm);
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-9);
+    padding-right: var(--spacing-9);
   }
 }
 
@@ -75,7 +149,15 @@
 button,
 input,
 select,
-textarea,
-[class*='font-'] {
+textarea {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Allow font utility classes to work */
+.font-manrope {
   font-family: 'Manrope', sans-serif !important;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif !important;
 }

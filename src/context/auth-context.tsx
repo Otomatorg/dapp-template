@@ -1,13 +1,16 @@
 import { setAxiosAuthorization } from '@/services/axios.config'
 import { apiServices } from 'otomato-sdk'
-import { createContext, useContext, useReducer } from 'react'
+import { createContext, useContext, useEffect, useReducer } from 'react'
 
 type TypeAuthContext = {
   token: string
-  isValid: boolean
   lastAddressLoggedIn: string
+  isLoading: boolean
+  isAuthenticated: boolean
+  getToken: () => string
   setAuth: (token: string, isValid: boolean) => void
   setLastAddressLoggedIn: (address: string) => void
+  onLogout: () => void
 }
 
 type TypeProps = {
@@ -30,11 +33,12 @@ const decodeJWTAndCheckValidity = (token: string) => {
     const exp = jsonPayload.exp
 
     // Check if current time is before expiration
-    const isValid = Date.now() < exp * 1000
+    const currentTime = Date.now()
+    const expirationTime = exp * 1000
+    const isValid = currentTime < expirationTime
 
     return isValid
   } catch (error) {
-    console.error('Error decoding JWT:', error)
     return false // Return false if decoding fails
   }
 }
@@ -43,21 +47,16 @@ const decodeJWTAndCheckValidity = (token: string) => {
 const lastAddressLoggedIn = localStorage.getItem('lastAddressLoggedIn') || ''
 const storedToken = localStorage.getItem('token') || ''
 
-// Determine token validity
-const isValidToken = storedToken ? decodeJWTAndCheckValidity(storedToken) : false
-
-// Define the initial state
+// Define the initial state - we'll validate the token in the provider
 const initialState = {
+  isLoading: false,
   token: storedToken,
+  isAuthenticated: false, // Start as false, validate in provider
   lastAddressLoggedIn: lastAddressLoggedIn,
-  isValid: isValidToken,
-  setAuth: () => {},
+  getToken: () => '',
   setLastAddressLoggedIn: () => {},
-}
-
-if (isValidToken) {
-  apiServices.setAuth(storedToken)
-  setAxiosAuthorization(storedToken)
+  setAuth: () => {},
+  onLogout: () => {},
 }
 
 const AuthContext = createContext<TypeAuthContext>(initialState)
@@ -65,11 +64,30 @@ const AuthContext = createContext<TypeAuthContext>(initialState)
 const reducer = (state: TypeAuthContext, { type, payload }: TypeAction) => {
   switch (type) {
     case 'SET_TOKEN': {
-      return { ...state, token: payload.token, isValid: payload.isValid }
+      const newState = {
+        ...state,
+        token: payload.token,
+        isAuthenticated: payload.isValid,
+      }
+
+      // Update localStorage
+      if (payload.token && payload.isValid) {
+        localStorage.setItem('token', payload.token)
+        apiServices.setAuth(payload.token)
+        setAxiosAuthorization(payload.token)
+      } else {
+        localStorage.removeItem('token')
+        apiServices.setAuth('')
+        setAxiosAuthorization('')
+      }
+
+      return newState
     }
 
     case 'SET_LAST_ADDRESS_LOGGED_IN': {
-      return { ...state, lastAddressLoggedIn: payload || '' }
+      const newState = { ...state, lastAddressLoggedIn: payload || '' }
+      localStorage.setItem('lastAddressLoggedIn', payload || '')
+      return newState
     }
 
     default:
@@ -81,9 +99,54 @@ const AuthProvider = ({ children }: TypeProps) => {
   // Uses `isLoggedIn` prop to determine whether or not to render a user
   const [auth, dispatch] = useReducer(reducer, initialState)
 
-  const handleSetAuth = (token: string, isValid: boolean) => {
-    if (token && isValid) apiServices.setAuth(token)
+  // Function to handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('lastAddressLoggedIn')
 
+    apiServices.setAuth('')
+    setAxiosAuthorization('')
+
+    dispatch({ type: 'SET_TOKEN', payload: { token: '', isValid: false } })
+    dispatch({ type: 'SET_LAST_ADDRESS_LOGGED_IN', payload: '' })
+  }
+
+  // Validate stored token on component mount
+  useEffect(() => {
+    if (storedToken) {
+      const isValid = decodeJWTAndCheckValidity(storedToken)
+
+      if (isValid) {
+        apiServices.setAuth(storedToken)
+        setAxiosAuthorization(storedToken)
+        dispatch({ type: 'SET_TOKEN', payload: { token: storedToken, isValid } })
+      } else {
+        handleLogout()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!auth.isAuthenticated || !auth.token) return
+
+    const checkTokenExpiration = () => {
+      const isValid = decodeJWTAndCheckValidity(auth.token)
+      if (!isValid) {
+        handleLogout()
+      }
+    }
+
+    // Check every 30 seconds
+    const interval = setInterval(checkTokenExpiration, 30000)
+
+    return () => clearInterval(interval)
+  }, [auth.isAuthenticated, auth.token])
+
+  const handleGetToken = () => {
+    return auth.token
+  }
+
+  const handleSetAuth = (token: string, isValid: boolean) => {
     dispatch({ type: 'SET_TOKEN', payload: { token, isValid } })
   }
 
@@ -93,7 +156,13 @@ const AuthProvider = ({ children }: TypeProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ ...auth, setAuth: handleSetAuth, setLastAddressLoggedIn: handleSetAddressLoggedIn }}
+      value={{
+        ...auth,
+        getToken: handleGetToken,
+        setAuth: handleSetAuth,
+        setLastAddressLoggedIn: handleSetAddressLoggedIn,
+        onLogout: handleLogout,
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -101,4 +170,4 @@ const AuthProvider = ({ children }: TypeProps) => {
 }
 
 const useAuthContext = () => useContext(AuthContext)
-export { AuthContext, AuthProvider, useAuthContext, decodeJWTAndCheckValidity }
+export { AuthContext, AuthProvider, decodeJWTAndCheckValidity, useAuthContext }

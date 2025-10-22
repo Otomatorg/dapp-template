@@ -7,7 +7,7 @@ import Footer from '../footer/footer'
 import Header from '../header/header'
 
 const Layout = () => {
-  const { isValid } = useAuthContext()
+  const { isAuthenticated } = useAuthContext()
   const { setUser } = useUserContext()
 
   useEffect(() => {
@@ -22,19 +22,15 @@ const Layout = () => {
       }
     }
 
-    if (isValid) {
+    if (isAuthenticated) {
       handleGetUserDetails()
     }
-  }, [isValid])
+  }, [isAuthenticated])
 
   return (
-    <div className="h-screen flex flex-col bg-black-400">
+    <div className="w-screen h-screen flex flex-col bg-rgba10-300 overflow-y-auto overflow-x-hidden">
       <Header />
-
-      <main className="flex-grow overflow-y-auto">
-        <Outlet />
-      </main>
-
+      <Outlet />
       <Footer />
     </div>
   )
