@@ -4,14 +4,14 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap border transition-all duration-200 cursor-pointer disabled:cursor-not-allowed',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap border transition-all duration-200 cursor-pointer disabled:cursor-not-allowed rounded-full',
   {
     variants: {
       variant: {
         default: 'bg-rgba10-150 text-white-100 border-rgba255-200 hover:bg-rgba182-100',
         primary: 'bg-green-100 text-darkblue-100',
         red: 'bg-red-200 text-white-100 border-rgba255-300 hover:bg-red-300',
-        blue: 'bg-blue-100 text-white-100 border-rgba255-300',
+        blue: 'bg-blue-200 text-white-100 border-rgba255-300',
         secondary: 'bg-rgba10-100 border-rgba255-200 text-white-100 hover:bg-rgba255-100',
       },
       size: {

@@ -17,6 +17,7 @@ interface IModalProps {
   titleClassName?: string
   descriptionClassName?: string
   children: React.ReactNode
+  onOpenChange?: (open: boolean) => void
 }
 
 const Modal = (props: IModalProps) => {
@@ -30,10 +31,11 @@ const Modal = (props: IModalProps) => {
     contentClassName,
     titleClassName,
     descriptionClassName,
+    onOpenChange,
   } = props
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={onOpenChange}>
       {trigger && (
         <DialogTrigger asChild className={triggerClassName}>
           {trigger}
