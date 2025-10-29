@@ -8,7 +8,8 @@ import { Input } from '../input'
 import { Label } from '../label'
 import Modal from './modal'
 
-const telegramAssistantUrl = 'https://t.me/OtomatoStagingBot?start=agent_noti-hyperevm_w_[address]'
+const telegramAssistantUrl = import.meta.env.VITE_TELEGRAM_ASSISTANT_URL || ''
+
 interface ITelegramAssistantProps {
   trigger: React.ReactNode
 }
