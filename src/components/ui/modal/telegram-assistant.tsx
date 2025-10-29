@@ -7,8 +7,12 @@ import Button from '../button/button'
 import { Input } from '../input'
 import { Label } from '../label'
 import Modal from './modal'
+import { Link } from 'react-router-dom'
+import { cn } from '@/lib/utils'
 
-const telegramAssistantUrl = import.meta.env.VITE_TELEGRAM_ASSISTANT_URL || ''
+const telegramAssistantUrl = import.meta.env.VITE_TELEGRAM_BOT_URL || ''
+
+console.log(telegramAssistantUrl)
 
 interface ITelegramAssistantProps {
   trigger: React.ReactNode
@@ -24,15 +28,7 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
   )
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const handleLaunchAssistant = () => {
-    if (!inputWalletAddress) return
-
-    const url = telegramAssistantUrl.replace('[address]', inputWalletAddress)
-    window.open(url, '_blank')
-  }
-
   const validateWalletAddress = (address: string): boolean => {
-    // Basic Ethereum address validation (0x followed by 40 hex characters)
     return /^0x[a-fA-F0-9]{40}$/.test(address)
   }
 
@@ -163,15 +159,23 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
           </div>
         )}
 
-        <Button
-          variant="blue"
-          disabled={!validateWalletAddress(inputWalletAddress)}
-          className="w-max h-12 rounded-full px-5 py-4 mx-auto font-manrope"
-          rightIcon={<img src={IcTelegramLogo} alt="ic-telegram-bot" />}
-          onClick={handleLaunchAssistant}
+        <Link
+          to={telegramAssistantUrl.replace('[address]', inputWalletAddress)}
+          target="_blank"
+          className={cn(
+            'text-center pointer-events-auto',
+            !validateWalletAddress(inputWalletAddress) && 'cursor-not-allowed pointer-events-none',
+          )}
         >
-          Launch Assistant
-        </Button>
+          <Button
+            variant="blue"
+            disabled={!validateWalletAddress(inputWalletAddress)}
+            className="w-max h-12 rounded-full px-5 py-4 mx-auto font-manrope"
+            rightIcon={<img src={IcTelegramLogo} alt="ic-telegram-bot" />}
+          >
+            Launch Assistant
+          </Button>
+        </Link>
       </div>
     </Modal>
   )
