@@ -12,7 +12,7 @@ const HyperEVMDeFiAssistant = () => {
         <div className="shrink-0 rounded-3xl overflow-hidden relative">
           <img src={ImgOtomatoHyperswapBanner} alt="otomato-hyperswap-banner" />
           <div className="w-full h-full absolute top-0 left-0 flex flex-col gap-4 px-10 py-6">
-            <h3 className="text-2xl font-semibold">Otomato x Hyperswap Notifications</h3>
+            <h3 className="text-2xl font-semibold">Otomato HyperEVM DeFi Assistant</h3>
             <TelegramAssistant
               trigger={
                 <Button
