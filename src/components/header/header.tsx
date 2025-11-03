@@ -9,7 +9,7 @@ const Header = () => {
   const { pathname } = useLocation()
 
   const headerLogo = useMemo(() => {
-    return pathname === PATHNAME.HOME ? ImgOtomatoLogo : ImgHyperswapLogo
+    return pathname === PATHNAME.HOME ? ImgOtomatoLogo : ImgOtomatoLogo
   }, [pathname])
 
   return (
@@ -17,7 +17,7 @@ const Header = () => {
       <div className="container grid grid-cols-3 items-center ">
         <div className="flex justify-start">
           <Link to={PATHNAME.HOME}>
-            <img srcSet={`${headerLogo} 2x`} alt="hyperswap-logo" />
+            <img srcSet={`${headerLogo} 2x`} alt="otomato-logo" />
           </Link>
         </div>
 
