@@ -11,7 +11,7 @@ const HyperEVMDeFiAssistant = () => {
 
   return (
     <main data-page="hyperevm-defi-assistant" className="flex-grow-1 min-h-[calc(100vh-9.375rem)]">
-      <div className="container-xl w-full h-full py-20 flex flex-col gap-6">
+      <div className="container-xl h-full py-20 flex flex-col gap-6">
         <div className="h-38 rounded-3xl overflow-hidden relative">
           <img
             className="w-full h-full object-cover"
