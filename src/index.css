@@ -97,13 +97,11 @@
 }
 
 @layer components {
-  .container {
+  .container-2xl {
     width: var(--container-2xl);
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--spacing-9);
-    padding-right: var(--spacing-9);
   }
 
   .container-xl {
@@ -111,8 +109,6 @@
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--spacing-9);
-    padding-right: var(--spacing-9);
   }
 
   .container-lg {
@@ -120,8 +116,6 @@
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--spacing-9);
-    padding-right: var(--spacing-9);
   }
 
   .container-md {
@@ -129,8 +123,6 @@
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--spacing-9);
-    padding-right: var(--spacing-9);
   }
 
   .container-sm {
@@ -138,8 +130,28 @@
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--spacing-9);
-    padding-right: var(--spacing-9);
+  }
+
+  @media screen and (min-width: 64rem) and (max-width: 90rem) {
+    .container-2xl,
+    .container-xl,
+    .container-lg,
+    .container-md,
+    .container-sm {
+      padding-left: 2.25rem;
+      padding-right: 2.25rem;
+    }
+  }
+
+  @media screen and (max-width: 64rem) {
+    .container-2xl,
+    .container-xl,
+    .container-lg,
+    .container-md,
+    .container-sm {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
   }
 }
 

@@ -1,18 +1,16 @@
 import IcTelegramLogo from '@/assets/icons/ic-telegram-logo.svg'
 import ImgTelegramAssistant from '@/assets/images/img-otomato-telegram-assistant.png'
 import { useAuthContext } from '@/context/auth-context'
+import { cn } from '@/lib/utils'
 import { useWallets } from '@privy-io/react-auth'
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Button from '../button/button'
 import { Input } from '../input'
 import { Label } from '../label'
 import Modal from './modal'
-import { Link } from 'react-router-dom'
-import { cn } from '@/lib/utils'
 
 const telegramAssistantUrl = import.meta.env.VITE_TELEGRAM_BOT_URL || ''
-
-console.log(telegramAssistantUrl)
 
 interface ITelegramAssistantProps {
   trigger: React.ReactNode
@@ -181,4 +179,4 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
   )
 }
 
-export default TelegramAssistant
+export default memo(TelegramAssistant)

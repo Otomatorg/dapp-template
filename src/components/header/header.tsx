@@ -1,4 +1,3 @@
-import ImgHyperswapLogo from '@/assets/images/img-hyperswap-logo@2x.png'
 import ImgOtomatoLogo from '@/assets/images/img-otomato-logo-v2@2x.png'
 import { PATHNAME } from '@/constants/pathname'
 import { useMemo } from 'react'
@@ -13,8 +12,8 @@ const Header = () => {
   }, [pathname])
 
   return (
-    <header className="w-full h-20 shrink-0bg-rgba10-150 sticky top-0 left-0 z-10 px-9 py-4 backdrop-blur-[2.34375rem]">
-      <div className="container grid grid-cols-3 items-center ">
+    <header className="w-full h-20 shrink-0 bg-rgba10-150 sticky top-0 left-0 z-10 py-4 backdrop-blur-[2.34375rem]">
+      <div className="container-2xl grid grid-cols-3 items-center ">
         <div className="flex justify-start">
           <Link to={PATHNAME.HOME}>
             <img srcSet={`${headerLogo} 2x`} alt="otomato-logo" />

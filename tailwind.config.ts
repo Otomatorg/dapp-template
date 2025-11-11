@@ -157,6 +157,9 @@ module.exports = {
           900: 'rgba(137, 137, 137, 0.9)',
         },
       },
+      spacing: {
+        '38': '9.5rem', // 152px
+      },
       borderRadius: {
         none: '0',
         sm: '0.125rem', // 2px
