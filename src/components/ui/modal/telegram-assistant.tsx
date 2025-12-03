@@ -1,10 +1,11 @@
 import IcTelegramLogo from '@/assets/icons/ic-telegram-logo.svg'
 import ImgTelegramAssistant from '@/assets/images/img-otomato-telegram-assistant.png'
+import { PATHNAME } from '@/constants/pathname'
 import { useAuthContext } from '@/context/auth-context'
 import { cn } from '@/lib/utils'
 import { useWallets } from '@privy-io/react-auth'
 import { memo, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Button from '../button/button'
 import { Input } from '../input'
 import { Label } from '../label'
@@ -17,8 +18,9 @@ interface ITelegramAssistantProps {
 }
 
 const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
-  const { isAuthenticated } = useAuthContext()
   const { wallets } = useWallets()
+  const { pathname } = useLocation()
+  const { isAuthenticated } = useAuthContext()
 
   const [inputWalletAddress, setInputWalletAddress] = useState('')
   const [validationState, setValidationState] = useState<'idle' | 'loading' | 'success' | 'error'>(
@@ -101,14 +103,17 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
           Stay informed without lifting a finger
         </h2>
         <p className="text-center text-sm text-rgba255-600 font-manrope leading-loose">
-          The HyperEVM Assistant keeps an eye on your Hyperswap positions and alerts you when you're
-          out of range or when major updates drop.
+          {pathname === PATHNAME.HYPEREVM_DEFI_ASSISTANT
+            ? "The HyperEVM Assistant keeps an eye on your Hyperswap positions and alerts you when you're out of range or when major updates drop."
+            : 'The Otomato DeFi Assistant keeps an eye on your DeFi positions and alerts you when needed.'}
         </p>
 
         {!isAuthenticated && (
           <div className="w-full max-w-xs flex flex-col mx-auto mt-4 mb-2 gap-3">
             <Label htmlFor="address" className="text-center">
-              Connect your wallet or input your address
+              {pathname === PATHNAME.HYPEREVM_DEFI_ASSISTANT
+                ? 'Connect your wallet or input your address'
+                : 'Input your wallet address'}
             </Label>
             <div className="relative w-full">
               <Input

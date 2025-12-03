@@ -1,9 +1,5 @@
-import IcRedOtomato from '@/assets/icons/ic-otomato-red-logo.svg'
-import IcTelegramLogo from '@/assets/icons/ic-telegram-logo.svg'
 import Button from '@/components/ui/button/button'
 import Dropdown from '@/components/ui/dropdown-menu/dropdown-menu'
-import TelegramAssistant from '@/components/ui/modal/telegram-assistant'
-import { PATHNAME } from '@/constants/pathname'
 import { useAuthContext } from '@/context/auth-context'
 import * as authService from '@/services/auth'
 import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth'
@@ -15,7 +11,6 @@ import { Signer } from '@zerodev/sdk/types'
 import { Loader2Icon, LogOut } from 'lucide-react'
 import { shortenAddress } from 'otomato-sdk'
 import { memo, useCallback, useMemo, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
 import { createPublicClient, defineChain, http } from 'viem'
 
 const baseChainId = 8453
@@ -47,12 +42,9 @@ const baseDefined = defineChain({
   testnet: false,
 })
 
-const telegramBotUrl = import.meta.env.VITE_TELEGRAM_BOT_URL || ''
-
 const WalletConnection = () => {
   const { ready, getAccessToken } = usePrivy()
   const { wallets } = useWallets()
-  const { pathname } = useLocation()
 
   const {
     isAuthenticated,
@@ -153,34 +145,6 @@ const WalletConnection = () => {
 
   return (
     <div className="shrink-0 flex items-center gap-2">
-      {pathname === PATHNAME.HYPEREVM_DEFI_ASSISTANT && (
-        <>
-          <TelegramAssistant
-            trigger={
-              <Button
-                variant="secondary"
-                className="h-12 bg-rgba137-140 rounded-lg"
-                leftIcon={
-                  <img width="24px" height="24px" src={IcRedOtomato} alt="ic-telegram-bot" />
-                }
-              >
-                Start DeFi Assistant (Via Popup)
-              </Button>
-            }
-          />
-
-          <Link to={telegramBotUrl.replace('[address]', 'unknown')} target="_blank">
-            <Button
-              variant="blue"
-              className="h-12 rounded-lg"
-              leftIcon={<img src={IcTelegramLogo} alt="ic-telegram-logo" />}
-            >
-              Start Defi Assistant (Now)
-            </Button>
-          </Link>
-        </>
-      )}
-
       {isAuthenticated ? (
         <Dropdown
           alignment="end"
