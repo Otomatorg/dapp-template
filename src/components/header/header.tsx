@@ -22,8 +22,7 @@ const Header = () => {
         </div>
 
         <div className="grow flex justify-end gap-2">
-          {pathname !== PATHNAME.HOME && <LaunchAssistant />}
-          {pathname !== PATHNAME.DEFI_ASSISTANT && <WalletConnection />}
+          {pathname !== PATHNAME.HOME ? <LaunchAssistant /> : <WalletConnection />}
         </div>
       </div>
     </header>

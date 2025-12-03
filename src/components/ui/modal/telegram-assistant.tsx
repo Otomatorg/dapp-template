@@ -1,9 +1,7 @@
 import IcTelegramLogo from '@/assets/icons/ic-telegram-logo.svg'
 import ImgTelegramAssistant from '@/assets/images/img-otomato-telegram-assistant.png'
 import { PATHNAME } from '@/constants/pathname'
-import { useAuthContext } from '@/context/auth-context'
 import { cn } from '@/lib/utils'
-import { useWallets } from '@privy-io/react-auth'
 import { memo, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import Button from '../button/button'
@@ -18,9 +16,7 @@ interface ITelegramAssistantProps {
 }
 
 const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
-  const { wallets } = useWallets()
   const { pathname } = useLocation()
-  const { isAuthenticated } = useAuthContext()
 
   const [inputWalletAddress, setInputWalletAddress] = useState('')
   const [validationState, setValidationState] = useState<'idle' | 'loading' | 'success' | 'error'>(
@@ -55,12 +51,6 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
       setValidationState(isValid ? 'success' : 'error')
     }, 400)
   }
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setInputWalletAddress(wallets?.[0]?.address || '')
-    }
-  }, [isAuthenticated, wallets])
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -108,59 +98,55 @@ const TelegramAssistant = ({ trigger }: ITelegramAssistantProps) => {
             : 'The Otomato DeFi Assistant keeps an eye on your DeFi positions and alerts you when needed.'}
         </p>
 
-        {!isAuthenticated && (
-          <div className="w-full max-w-xs flex flex-col mx-auto mt-4 mb-2 gap-3">
-            <Label htmlFor="address" className="text-center">
-              {pathname === PATHNAME.HYPEREVM_DEFI_ASSISTANT
-                ? 'Connect your wallet or input your address'
-                : 'Input your wallet address'}
-            </Label>
-            <div className="relative w-full">
-              <Input
-                className="h-10 border-rgba255-300 rounded-xl pr-10"
-                type="text"
-                id="address"
-                placeholder="Input here"
-                value={inputWalletAddress}
-                onChange={OnInputChange}
-              />
-              {validationState === 'loading' && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-full max-w-xs flex flex-col mx-auto mt-4 mb-2 gap-3">
+          <Label htmlFor="address" className="text-center">
+            Input your wallet address
+          </Label>
+          <div className="relative w-full">
+            <Input
+              className="h-10 border-rgba255-300 rounded-xl pr-10"
+              type="text"
+              id="address"
+              placeholder="Input here"
+              value={inputWalletAddress}
+              onChange={OnInputChange}
+            />
+            {validationState === 'loading' && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+            {validationState === 'success' && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </div>
-              )}
-              {validationState === 'success' && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
+              </div>
+            )}
+            {validationState === 'error' && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="w-4 h-4 bg-red-100 flex items-center justify-center rounded-full">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </div>
-              )}
-              {validationState === 'error' && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 bg-red-100 flex items-center justify-center rounded-full">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              )}
-            </div>
-            {validationState === 'error' && inputWalletAddress && (
-              <p className="text-red-100 text-xs">Please enter a valid wallet address</p>
+              </div>
             )}
           </div>
-        )}
+          {validationState === 'error' && inputWalletAddress && (
+            <p className="text-red-100 text-xs">Please enter a valid wallet address</p>
+          )}
+        </div>
 
         <Link
           to={telegramAssistantUrl.replace('[address]', inputWalletAddress)}
