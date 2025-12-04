@@ -11,7 +11,7 @@ const buttonVariants = cva(
         default: 'bg-rgba10-150 text-white-100 border-rgba255-200 hover:bg-rgba182-100',
         primary: 'bg-green-100 text-darkblue-100',
         red: 'bg-red-200 text-white-100 border-rgba255-300 hover:bg-red-300',
-        blue: 'bg-blue-200 text-white-100 border-rgba255-300',
+        blue: 'bg-blue-200 hover:bg-blue-300 disabled:bg-blue-400 text-white-100 border-rgba255-300',
         secondary: 'bg-rgba10-100 border-rgba255-200 text-white-100 hover:bg-rgba255-100',
       },
       size: {

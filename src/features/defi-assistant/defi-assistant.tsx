@@ -25,19 +25,19 @@ const DeFiAssistant = () => {
                 trigger={
                   <Button
                     variant="red"
-                    className="w-max h-10"
+                    className="w-max h-10 px-2"
                     leftIcon={
                       <img
-                        width="20px"
-                        height="20px"
+                        width="22px"
+                        height="22px"
                         src={IcWhiteOtomato}
                         alt="ic-white-otomato-logo"
                       />
                     }
                     rightIcon={
                       <img
-                        width="24px"
-                        height="24px"
+                        width="20px"
+                        height="20px"
                         src={IcWhiteArrowRight}
                         alt="ic-white-arrow-right"
                       />
@@ -51,7 +51,7 @@ const DeFiAssistant = () => {
               <Link to={telegramBotUrl.replace('[address]', 'unknown')} target="_blank">
                 <Button
                   variant="blue"
-                  className="h-10"
+                  className="h-10 px-2"
                   leftIcon={<img src={IcTelegramLogo} alt="ic-telegram-logo" />}
                 >
                   Start Defi Assistant (Now)

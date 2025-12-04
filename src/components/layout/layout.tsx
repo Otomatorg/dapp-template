@@ -4,8 +4,8 @@ import { useUserContext } from '@/context/user-context'
 import { getUserDetails } from '@/services/user'
 import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import DefiAssistantFooter from '../footer/defi-assistant-footer'
 import Footer from '../footer/footer'
-import HyperSwapFooter from '../footer/hyperswap-footer'
 import Header from '../header/header'
 
 const Layout = () => {
@@ -34,7 +34,7 @@ const Layout = () => {
     <div className="w-screen h-screen flex flex-col bg-rgba10-300 overflow-y-auto overflow-x-hidden">
       <Header />
       <Outlet />
-      {pathname === PATHNAME.HOME ? <Footer /> : <HyperSwapFooter />}
+      {pathname === PATHNAME.HOME ? <Footer /> : <DefiAssistantFooter />}
     </div>
   )
 }
