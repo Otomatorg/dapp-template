@@ -1,19 +1,20 @@
 import { RouterProvider } from 'react-router'
-import { PrivyProvider, ThemeProvider } from './components/providers'
+import { ThirdwebProvider } from 'thirdweb/react'
+import { ThemeProvider } from './components/providers'
 import { AuthProvider } from './context/auth-context'
 import { UserProvider } from './context/user-context'
 import { router } from './routes/routes'
 
-export const App = () => {
+export function App() {
   return (
     <ThemeProvider defaultTheme="dark">
-      <AuthProvider>
-        <PrivyProvider>
+      <ThirdwebProvider>
+        <AuthProvider>
           <UserProvider>
             <RouterProvider router={router} />
           </UserProvider>
-        </PrivyProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </ThirdwebProvider>
     </ThemeProvider>
   )
 }

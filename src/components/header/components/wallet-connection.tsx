@@ -1,195 +1,242 @@
-import Button from '@/components/ui/button/button'
-import Dropdown from '@/components/ui/dropdown-menu/dropdown-menu'
-import { useAuthContext } from '@/context/auth-context'
-import * as authService from '@/services/auth'
-import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth'
-import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
-import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator'
-import { createKernelAccount } from '@zerodev/sdk'
-import { getEntryPoint } from '@zerodev/sdk/constants'
-import { Signer } from '@zerodev/sdk/types'
-import { Loader2Icon, LogOut } from 'lucide-react'
-import { shortenAddress } from 'otomato-sdk'
+import IconChevronDown from '@/assets/icons/ic-chevron-down.svg'
+import IconConnectWallet from '@/assets/icons/ic-connect-wallet.svg'
+import { EnumChain, getAllChainIds } from '@/configs/chain'
+import { client } from '@/configs/client'
+import { wallets } from '@/configs/wallet'
+import { decodeJWTAndCheckValidity, useAuthContext } from '@/context/auth-context'
+import { setAxiosAuthorization } from '@/services/axios.config'
+import clsx from 'clsx'
+import { apiServices } from 'otomato-sdk'
 import { memo, useCallback, useMemo, useState } from 'react'
-import { createPublicClient, defineChain, http } from 'viem'
+import { defineChain } from 'thirdweb'
+import { LoginPayload } from 'thirdweb/dist/types/auth/core/types'
+import {
+  ConnectButton,
+  useActiveWallet,
+  useActiveWalletChain,
+  useConnectedWallets,
+  useWalletImage,
+} from 'thirdweb/react'
+import { shortenAddress } from 'thirdweb/utils'
+import { Wallet } from 'thirdweb/wallets'
+import Button from '@/components/ui/button/button'
 
-const baseChainId = 8453
+const BUTTON_CLASSNAMES =
+  '!min-w-[auto] !min-h-[auto] !px-[16px] !py-[12px] !h-[40px] !text-[12px] !rounded-[100px] !bg-black-100 !text-white-100'
 
-const baseRpcConfig = {
-  zerodev: import.meta.env.VITE_ZERODEV_BASE_RPC,
-  custom: import.meta.env.VITE_BASE_HTTPS_PROVIDER,
-  alchemy: import.meta.env.VITE_ALCHEMY_BASE_RPC,
-  pimlicoBundler: import.meta.env.VITE_PIMLICO_BASE_BUNDLER_RPC,
-}
+const WalletConnection = memo(() => {
+  const chain = useActiveWalletChain() || defineChain(EnumChain.BASE)
+  const connectedWallets = useConnectedWallets()
+  const smartWallet = useActiveWallet()
 
-const baseDefined = defineChain({
-  id: baseChainId,
-  name: 'Base',
-  network: 'base',
-  nativeCurrency: {
-    name: 'Base',
-    symbol: 'BASE',
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: [baseRpcConfig.zerodev],
-    },
-  },
-  blockExplorers: {
-    default: { name: 'Base Scan', url: 'https://basescan.org' },
-  },
-  testnet: false,
-})
+  const { setAuth, setLastAddressLoggedIn: setAddressInContext } = useAuthContext()
 
-const WalletConnection = () => {
-  const { ready, getAccessToken } = usePrivy()
-  const { wallets } = useWallets()
+  const [walletConnected, setWalletConnected] = useState<Wallet | undefined>(undefined)
+  const [, setIsLoading] = useState(false)
 
-  const {
-    isAuthenticated,
-    setAuth,
-    setLastAddressLoggedIn: setAddressInContext,
-    onLogout,
-  } = useAuthContext()
-  const [isConnecting, setIsConnecting] = useState(false)
-
-  const createKernelAccountFromZeroDev = useCallback(async (signer: Signer) => {
-    const publicClient = createPublicClient({
-      transport: http(baseRpcConfig.zerodev),
-      chain: baseDefined,
-    })
-
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      entryPoint: getEntryPoint('0.7'),
-      signer,
-      kernelVersion: '0.3.1',
-    })
-
-    const account = await createKernelAccount(publicClient, {
-      entryPoint: getEntryPoint('0.7'),
-      kernelVersion: '0.3.1',
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-    })
-
-    return account
+  const accessTokens = JSON.parse(localStorage.getItem('accessTokens') || '{}') as Record<
+    string,
+    string
+  >
+  const definedChains = useMemo(() => {
+    const chains = getAllChainIds()
+    return chains.map((chain) => defineChain(chain as number))
   }, [])
 
-  const handleConnectSuccess = useCallback(async () => {
+  const walletId = useMemo(() => {
+    return connectedWallets.find((w) => w.id !== walletConnected?.id)?.id
+  }, [connectedWallets, walletConnected?.id])
+
+  const { data: walletImage } = useWalletImage(walletId)
+
+  const onConnectWallet = (wallet: Wallet) => {
+    setWalletConnected(wallet)
+  }
+
+  const handleLogout = async () => {
+    if (smartWallet) {
+      await smartWallet.disconnect()
+    }
+
+    setWalletConnected(undefined)
+    setAuth('', false)
+    setAxiosAuthorization('')
+
+    localStorage.removeItem('token')
+
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
+  }
+
+  const handleCheckLoggedIn = async (): Promise<boolean> => {
     try {
-      setIsConnecting(true)
+      const smartAddress = smartWallet?.getAccount()?.address || ''
+      const token = accessTokens[smartAddress]
 
-      // Step 1: Get Privy access token
-      const privyAccessToken = await getAccessToken()
-      if (!privyAccessToken) {
-        throw new Error('Failed to get Privy access token')
+      if (!token) {
+        return false
       }
 
-      // Step 2: Get wallet address
-      const wallet = wallets[0]
-      if (!wallet) {
-        throw new Error('No wallet found')
+      // we decode its JWT to check if it's still valid
+      const isValid = decodeJWTAndCheckValidity(token)
+
+      if (isValid) {
+        localStorage.setItem('token', token)
+
+        setAuth(token, isValid)
+        setAxiosAuthorization(token)
+        setAddressInContext(smartAddress)
+
+        return true
       }
 
-      // Step 3: Create kernel account (smart wallet) using ZeroDev
-      const signer = (await wallet.getEthereumProvider()) as Signer
-      const kernelAccount = await createKernelAccountFromZeroDev(signer)
-      const smartWalletAddress = kernelAccount.address
-
-      // Step 4: Call your API to get JWT token
-      const response = await authService.getToken({
-        walletAddress: smartWalletAddress,
-        ownerWalletAddress: wallet.address,
-        accessToken: privyAccessToken,
-      })
-
-      if (!response?.data?.token) {
-        throw new Error('Failed to get authentication token')
-      }
-
-      // Step 5: Update auth context
-      setAuth(response.data.token, true)
-      setAddressInContext(wallet.address)
+      return false
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Connection failed'
-      console.error('Failed to login:', errorMessage)
+      console.log('Failed to check user logged in: ', error)
+    }
+
+    await handleLogout()
+    return false
+  }
+
+  const handleLogin = async ({
+    payload,
+    signature,
+  }: {
+    payload: LoginPayload
+    signature: string
+  }) => {
+    setIsLoading(true)
+
+    try {
+      const { token } = await apiServices.getToken(payload, signature)
+
+      if (!token) {
+        throw new Error('Failed to get token')
+      }
+
+      const smartAddress = smartWallet?.getAccount()?.address || ''
+      const updatedTokens = { ...accessTokens, [smartAddress]: token }
+
+      // Set authentication and persist data
+      setAuth(token, true)
+      setAxiosAuthorization(token)
+
+      localStorage.setItem('accessTokens', JSON.stringify(updatedTokens))
+      localStorage.setItem('lastAddressLoggedIn', smartAddress)
+      localStorage.setItem('token', token)
+
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+    } catch (error: any) {
+      console.error('Failed to get token: ', error)
+
+      if (smartWallet) {
+        await smartWallet.disconnect()
+      }
     } finally {
-      setIsConnecting(false)
+      setIsLoading(false)
     }
-  }, [wallets, getAccessToken, setAuth, setAddressInContext, createKernelAccountFromZeroDev])
+  }
 
-  const { login } = useLogin({
-    onComplete: handleConnectSuccess,
-    onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed'
-      console.log(errorMessage)
-      setIsConnecting(false)
-    },
-  })
+  const handleGetLoginPayload = async (): Promise<LoginPayload> => {
+    setIsLoading(true)
+    try {
+      const walletAddress = smartWallet?.getAdminAccount?.()?.address || ''
+      const smartAddress = smartWallet?.getAccount?.()?.address || ''
 
-  const { logout } = useLogout({
-    onSuccess: () => {
-      onLogout()
-    },
-  })
+      const loginPayload = await apiServices.generateLoginPayload(
+        smartAddress,
+        chain.id,
+        '',
+        walletAddress,
+      )
 
-  const walletConnected = useMemo(() => {
-    if (isAuthenticated && wallets.length) {
-      return wallets[0]
+      if (!loginPayload?.address) {
+        await handleLogout()
+
+        throw new Error('Failed to generate login payload')
+      }
+
+      return loginPayload
+    } catch (error: any) {
+      await handleLogout()
+
+      const errorMessage = error?.message || error?.response?.data?.message
+      throw new Error(errorMessage)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    return null
-  }, [isAuthenticated, wallets])
+  const renderConnectedButton = useCallback(() => {
+    const adminAccount = smartWallet?.getAdminAccount?.()
+    const address = adminAccount?.address
+
+    return address ? (
+      <Button
+        leftIcon={<img src={walletImage} width="20px" height="20px" alt="img-wallet" />}
+        rightIcon={<img src={IconChevronDown} alt="ic-chevron-down" />}
+        className={clsx(BUTTON_CLASSNAMES, 'flex items-center')}
+      >
+        {shortenAddress(address)}
+      </Button>
+    ) : (
+      <div />
+    )
+  }, [smartWallet, walletImage])
 
   return (
-    <div className="shrink-0 flex items-center gap-2">
-      {isAuthenticated ? (
-        <Dropdown
-          alignment="end"
-          trigger={
-            <Button
-              className="h-12 rounded-xl"
-              disabled={!ready}
-              leftIcon={
-                ready ? (
-                  <img
-                    width="20px"
-                    height="20px"
-                    src={walletConnected?.meta?.icon}
-                    alt={walletConnected?.meta?.name}
-                  />
-                ) : (
-                  <Loader2Icon className="w-4 h-4 animate-spin text-white-100" />
-                )
-              }
-            >
-              {ready ? shortenAddress(walletConnected?.address || '') : 'Connecting...'}
-            </Button>
-          }
-          menuContentClassName="max-w-[10rem] px-2.5 py-2 rounded-xl"
-        >
-          <DropdownMenuItem className="w-full p-0">
-            <Button
-              variant="secondary"
-              className="rounded-md border-0"
-              leftIcon={<LogOut className="w-5 h-5" />}
-              onClick={logout}
-            >
-              Disconnect
-            </Button>
-          </DropdownMenuItem>
-        </Dropdown>
-      ) : (
-        <div className="flex flex-col gap-1">
-          <Button disabled={isConnecting} className="h-12 rounded-xl" onClick={login}>
-            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-          </Button>
-        </div>
-      )}
+    <div>
+      <ConnectButton
+        theme="dark"
+        client={client}
+        wallets={wallets}
+        chain={chain}
+        chains={definedChains}
+        accountAbstraction={{
+          chain: chain,
+          sponsorGas: true,
+        }}
+        connectButton={{
+          label: (
+            <div className="cursor-pointer flex items-center">
+              <div className="mr-2">
+                <img src={IconConnectWallet} alt="ic-connect-wallet" />
+              </div>
+              <p className="text-sm">Connect Wallet</p>
+            </div>
+          ),
+          className: BUTTON_CLASSNAMES,
+        }}
+        signInButton={{
+          label: 'Sign In',
+          className: BUTTON_CLASSNAMES,
+        }}
+        detailsButton={{
+          render: () => renderConnectedButton(),
+        }}
+        connectModal={{
+          title: 'Connect Wallet',
+          size: 'wide',
+          titleIcon: '',
+        }}
+        onConnect={onConnectWallet}
+        onDisconnect={handleLogout}
+        showAllWallets={false}
+        auth={{
+          isLoggedIn: handleCheckLoggedIn,
+          doLogin: handleLogin,
+          getLoginPayload: handleGetLoginPayload,
+          doLogout: handleLogout,
+        }}
+      />
     </div>
   )
-}
+})
 
-export default memo(WalletConnection)
+WalletConnection.displayName = 'WalletConnection'
+
+export default WalletConnection
